@@ -3,6 +3,8 @@ class User < ActiveRecord::Base
   validates :email, presence: true, uniqueness: true
   validates :name, presence: true
 
+  has_one :session
+
   def add_error(attribute, message)
     errors.add(attribute, message)
   end

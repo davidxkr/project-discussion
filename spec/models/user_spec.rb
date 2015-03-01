@@ -11,3 +11,7 @@ describe User, 'Validations' do
   it { expect(subject).to validate_presence_of :name }
   it { expect(subject).to validate_uniqueness_of :email }
 end
+
+describe User, 'Relations' do
+  it { expect(subject).to have_one(:session) }
+end

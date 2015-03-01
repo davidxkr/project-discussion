@@ -3,8 +3,8 @@ class Api::V1::SessionsController < ApiController
   def create
     user = User.find_by(email: user_params[:email])
     user = UserAuthenticator.authenticate_user( user: user,
-    	                                        password: user_params[:password],
-    	                                        request: request )
+                                                password: user_params[:password],
+                                                remote_ip: request.remote_ip )
 
     respond_with user, location: :api_signin
   end

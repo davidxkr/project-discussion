@@ -1,10 +1,10 @@
 class UserAuthenticator
-  attr_reader :user, :password, :request
+  attr_reader :user, :password, :remote_ip
 
   def initialize(params)
     @user = params[:user]
     @password = params[:password]
-    @request = params[:request]
+    @remote_ip = params[:remote_ip]
   end
 
   class << self
@@ -30,6 +30,7 @@ class UserAuthenticator
 
     set_error_on_failed_authentication unless authenticated
 
+    set_user_session if authenticated
     authenticated
   end
 
@@ -45,5 +46,10 @@ class UserAuthenticator
 
   def set_error_on_blocked_user
     user.add_error(:blocked, I18n.t('exceptions.user.blocked'))
+  end
+
+  def set_user_session
+    user.session = SessionBuilder.build(remote_ip)
+    user.save
   end
 end
