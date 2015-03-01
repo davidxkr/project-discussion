@@ -5,6 +5,8 @@ class User < ActiveRecord::Base
 
   has_one :session
 
+  delegate :token, to: :session, prefix: true
+
   def add_error(attribute, message)
     errors.add(attribute, message)
   end
