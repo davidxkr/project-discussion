@@ -38,12 +38,17 @@ describe Api::V1::SessionsController do
     end
   end
 
-  context 'valid login' do
+  context 'whit valid credentials' do
+    before(:each) { post :create, session_params }
+
+    it 'should respond with success' do
+
+      expect(response).to have_http_status(:success)
+    end
+
   	it 'should respond with user token' do
 
-  	  post :create, session_params
-
-  	  expect(response).to have_http_status(:success)
+      expect(json_body[:token]).not_to be_empty
   	end
   end
 end
