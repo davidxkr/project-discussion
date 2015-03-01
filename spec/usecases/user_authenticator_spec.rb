@@ -5,54 +5,49 @@ describe UserAuthenticator do
   let(:remote_ip) { '127.0.0.1' } 
 
   describe '#authenticate_user' do
+
+    def authenticate_user(user, password)
+      UserAuthenticator.authenticate_user( user: user,
+                                           password: password,
+                                           remote_ip: remote_ip )
+    end
+
     context 'invalid user credentials' do
 
       it 'expect an error on email ' do
-        user_result = UserAuthenticator.authenticate_user( user: nil,
-                                                           password: '12',
-                                                           remote_ip: remote_ip )
+        user_result = authenticate_user(nil, '1234')
 
-       expect(user_result.errors).to have_key(:email)
+        expect(user_result.errors).to have_key(:email)
       end
 
       it 'expect an error on password' do
-        user_result = UserAuthenticator.authenticate_user( user: user,
-                                                           password: '123',
-                                                           remote_ip: remote_ip )
+        user_result = authenticate_user(user, '1234')
+
         expect(user_result.errors).to have_key(:password)
       end
 
       it 'expect an error on blocked' do
         user_blocked = create(:user, blocked: true)
-        user_result = UserAuthenticator.authenticate_user( user: user_blocked,
-                                                           password: '123456',
-                                                           remote_ip: remote_ip )
+        user_result = authenticate_user(user_blocked, '123456')
+
         expect(user_result.errors).to have_key(:blocked)
       end
 
       it 'should return nil on session' do
-      	user_result = UserAuthenticator.authenticate_user( user: user,
-                                                           password: '123',
-                                                           remote_ip: remote_ip )
-      	expect(user_result.session).to be nil
+        user_result = authenticate_user(user, '1234')
+
+        expect(user_result.session).to be nil
       end
     end
 
     context 'with valid user credentials' do
-      it 'return a valid user' do
-        user_result = UserAuthenticator.authenticate_user( user: user,
-                                                           password: '123456',
-                                                           remote_ip: remote_ip )
+      let(:user_with_session) { authenticate_user(user, '123456') }
 
-        expect(user_result).to be_valid
-      end
+      it { expect(user_with_session).to be_valid }
 
-      it 'the user should have a session' do
-        user_result = UserAuthenticator.authenticate_user( user: user,
-                                                           password: '123456',
-                                                           remote_ip: remote_ip )
-        expect(user_result.session).to be_a(Session)
-      end
+      it { expect(user_with_session.session).to be_a(Session) }
+
+      it { expect(user_with_session.session_token).not_to be_empty}
     end
   end
 end
