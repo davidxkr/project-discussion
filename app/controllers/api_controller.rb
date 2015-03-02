@@ -26,7 +26,6 @@ class ApiController < ActionController::Base
   def authenticate_user
     BearerToken.authenticate_with_http_token(self) do |token, options|
       session_token = Session.find_by(token: token)
-      #binding.pry
       @current_user = session_token.try(:user)
     end
   end

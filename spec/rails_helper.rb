@@ -29,6 +29,7 @@ ActiveRecord::Migration.maintain_test_schema!
 
 RSpec.configure do |config|
   
+  config.include SessionHelper, :type => :controller
   config.include JsonHelper, :type => :controller
   config.include HeaderHelper, :type => :controller
 
