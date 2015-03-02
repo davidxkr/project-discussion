@@ -1,4 +1,6 @@
 class ApiController < ActionController::Base
+
+  skip_before_action :verify_authenticity_token
   before_action :authenticate_application!
 
   respond_to :json
@@ -8,6 +10,26 @@ class ApiController < ActionController::Base
   end
 
   protected
+
+  def current_user
+    @current_user
+  end
+
+  def current_user?
+    !@current_user.nil?
+  end
+
+  def authenticate_user!
+    authenticate_user || render_unauthorized('User')
+  end
+
+  def authenticate_user
+    BearerToken.authenticate_with_http_token(self) do |token, options|
+      session_token = Session.find_by(token: token)
+      #binding.pry
+      @current_user = session_token.try(:user)
+    end
+  end
 
   def authenticate_application!
     authenticate_application || render_unauthorized

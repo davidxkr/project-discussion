@@ -9,7 +9,7 @@ describe ApiController do
     end
   end
 
-  context 'Security' do
+  context 'Security by application' do
 
     describe 'with bad credentials' do
       before(:each) { get :index }
@@ -49,6 +49,57 @@ describe ApiController do
         get :index
         expect(response).to have_http_status(401)
       end
+    end
+  end
+end
+
+describe ApiController do
+  before(:each) {  include_default_accept_headers  }
+
+  controller do
+    before_filter :authenticate_user!
+
+    def index
+      render text: 'index called'
+    end
+  end
+
+  describe 'Security by bearer token' do
+    context 'invalid user token' do
+
+      it 'recives a 401 when no bearer token is present' do
+        get :index
+
+        expect(response).to have_http_status(401)
+      end
+
+      it 'recives a 401 when bearer token is invalid' do
+        request.headers['HTTP_X_AUTHORIZATION'] = "Bearer token=1111111"
+        get :index
+
+        expect(response).to have_http_status(401)
+     end
+
+     it { expect(controller.send(:current_user?)).to be false }
+
+     it { expect(controller.send(:current_user)).to be nil }
+    end
+
+    context 'with valid bearer token' do
+      before(:each) do
+         session =  build(:session)
+         session.set_token
+         @user = create(:user, session: session)
+         request.headers['HTTP_X_AUTHORIZATION'] = "Bearer token=#{@user.session_token}"
+
+         get :index
+      end
+
+      it { expect(response).to have_http_status(200) }
+
+      it { expect(controller.send(:current_user?)).to be true }
+
+      it { expect(controller.send(:current_user)).to be_eql(@user) }
     end
   end
 end
